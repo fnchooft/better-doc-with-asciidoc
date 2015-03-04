@@ -1,0 +1,107 @@
+== Souce Code
+
+Cassandra constitutes the heart of the speed layer.
+Data is recovered from Kafka and then inserted into the tables detailed in this section.
+Currently there are 4 tables in the Cassandra server :
+
+ * tweet
+ * tweet_timeline
+ * tweet_timeline2
+ * tweet_count
+
+=== Keyspace
+
+[source,sql]
+DROP KEYSPACE cra_<env>_v30;
+CREATE KEYSPACE cra_<env>_v30 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+
+
+=== tweet
+
+Tweet storage
+
+[source,sql]
+DROP TABLE tweet;
+CREATE TABLE tweet (tweet_id bigint PRIMARY KEY,
+					created_at timestamp,
+					message text,
+					hashtags list<text>,
+					latitude double,
+					longitude double,
+					favorite_count int,
+					in_reply_to_status_id bigint,
+					in_reply_to_user_id bigint,
+					lang text,
+					retweet_count bigint,
+					source text,
+					user_favorite_count int,
+					user_friends_count int,
+					user_id bigint,
+					user_lang text,
+					user_location text,
+					user_name text,
+					user_screen_name text,
+					user_statuses_count int,
+					user_time_zone text,
+					user_utc_offset int,
+					is_retweet_original boolean,
+					retweet_original_id bigint,
+					place_street_address text,
+					place_place_type text,
+					place_name text,
+					place_full_name text,
+					place_country text
+					);
+
+=== tweet_timeline
+
+Tweet storage by time
+
+[source,sql]
+DROP TABLE tweet_timeline;
+CREATE TABLE tweet_timeline (
+    sensor_id   uuid,
+    bucket_id   text,
+    time_id     timestamp,
+    tweet_id    bigint,
+    PRIMARY KEY((sensor_id, bucket_id), time_id, tweet_id))
+    WITH CLUSTERING ORDER BY (time_id DESC)
+    AND COMPACT STORAGE
+;
+
+===  tweet_timeline2
+
+[source,sql]
+DROP TABLE tweet_timeline2;
+CREATE TABLE tweet_timeline2 (
+    sensor_id   uuid,
+    bucket_id   text,
+    time_id     timestamp,
+    key         text,
+    tweet_id    bigint,
+    PRIMARY KEY((sensor_id, bucket_id), time_id, key, tweet_id))
+    WITH CLUSTERING ORDER BY (time_id DESC)
+    AND COMPACT STORAGE
+;
+
+=== tweet_count
+
+Tweet counter by time
+
+[source,sql]
+DROP TABLE tweet_count;
+CREATE TABLE tweet_count (
+    sensor_id   uuid,
+    bucket_id   text,
+    time_id     timestamp,	-- granualarity
+    key         text,
+    count       counter,
+    PRIMARY KEY((sensor_id, bucket_id), time_id, key))
+    WITH CLUSTERING ORDER BY (time_id DESC)
+    AND COMPACT STORAGE
+;
+
+
+
+
+

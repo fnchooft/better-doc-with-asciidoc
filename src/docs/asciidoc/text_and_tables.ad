@@ -1,0 +1,178 @@
+== Impala
+
+
+All tables are partitioned by day, i.e. queries are most efficient when
+constrained on one or more concrete days.
+As a result of the partitioning each table has a column +ds+
+which contains the day the tweet was sent as the partition value in the format +yyyy-mm-dd+.
+
+=== sensor_x_tweets
+
+This table contains the individual tweets along with some attribute pertinent to the tweet.
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| latitude              | double  | latitude if set                      |
+| longitude             | double  | longitude if set                     |
+| time_id               | string  | time of creation                     | convert into a long
+| favorite_count        | int     |                                      |
+| tweet_id              | bigint  | unique tweet id                      |
+| in_reply_to_status_id | bigint  | unique id of message replied to      |
+| in_reply_to_user_id   | bigint  | unique id of user replied to         |
+| lang                  | string  | tweet language code                  |
+| retweet_count         | bigint  |                                      |
+| source                | string  |                                      |
+| message               | string  | the message                          |
+| user_favorite_count   | int     |                                      |
+| user_friends_count    | int     |                                      |
+| user_id               | bigint  |  unique user id                       |
+| user_lang             | string  | user language                        |
+| user_location         | string  | user location                        |
+| user_name             | string  | user name                            |
+| user_screen_name      | string  | user screen name                     |
+| user_statuses_count   | int     | number of tweets sent                |
+| user_time_zone        | string  | user time zone                       |
+| user_utc_offset       | int     | time zone offset in hours or minutes |
+| place_street_address  | string  |                                      |
+| place_name            | string  |                                      |
+| place_type            | string  |                                      |
+| place_country         | string  |                                      |
+| ds                    | string  | partition column day string          | convert into long ?
+|==============================================================================================
+
+=== sensor_x_tseries
+
+Contains the aggregated counters for all individual terms (word) by hour.
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| time_id | string | the hour when key occurred                                                       |
+| key     | string | the key found in a tweet                    |   rename to “word"
+| number  | int    | the number of occurrences of key in time_id |
+| ds      | string | partition column day string                 |
+|==============================================================================================
+
+=== sensor_x_tindex
+
+Contains the ids for the tweets containing the individual terms counted in target_x_tseries.
+
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| time_id  | string | the hour when key occurred                                 |
+| key      | string | the key found in a tweet                    | rename to “word"
+| tweet_id | bigint | the id of the tweet containing key          |
+| ds       | string | partition column day string                 |
+|==============================================================================================
+
+
+=== sensor_x_graph
+
+Contains the co-word graph for the tweets, i.e. the aggregated counters for each pair of words found in the same tweet by hour.
+
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| time_id | string | the hour when key occurred                  |
+| key1    | string | the key found in a tweet                    |
+| key2    | string | the key found in a tweet                    |
+| number  | int    | the number of occurrences of key in time_id |
+| ds      | string | partition column day string                 |
+|==============================================================================================
+
+=== sensor_x_user
+
+
+Contains some important user information by day. “Current" numbers mean the maximum found for the particular day.
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| account_id   | bigint | the user id                                                             |
+| account_name | string | the user screen name                                                    |
+| followers    | int    | the current number of followers of this user                            |
+| friends      | int    | the current number of friends of this user                              |
+| statuses     | int    |  the current number of statuses of this user                             |
+| number       | int    | the number of tweets of this user on this day (as seen in the stream)   |
+| retweets     | int    | the number of retweets of this user on this day (as seen in the stream) |
+| ds           | string | partition column day string                                             |
+|==============================================================================================
+
+
+=== sensor_x_retweet_graph
+
+Contains the retweet graph by day. The graph is directed. src_id and src_name are the user id and the user screen name of the author of the tweet being retweeted (the “original”), respectively. dest_id and dest_name are the user id and the user screen name of the author of the retweet, respectively.
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| src_id    | bigint |  the author id of the original tweet   |
+| src_name  | string | the author name of the original tweet |
+| dest_id   | bigint |  the author id of the retweet          |
+| dest_name | string | the author name of the retweet        |
+| number    | int    |  the number of retweets by day         |
+| ds        | string | partition column day string           |
+|==============================================================================================
+
+=== sensor_x_mention_graph
+
+Contains the mention graph by day. The graph is directed. src_id and src_name are the user id and the user screen name of the tweet author using the @mention tag, respectively. dest_id and dest_name are the user id and the user screen name of the user being mentioned, respectively.
+
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| src_id    | bigint |  the author id of the original tweet   |
+| src_name  | string | the author name of the original tweet |
+| dest_id   | bigint |  the id of the user being mentioned    |
+| dest_name | string | the name of the user being mentioned  |
+| number    | int    |  the number of mentions by day         |
+| ds        | string | partition column day string           |
+|==============================================================================================
+
+
+=== sensor_x_geocells
+
+Contains the aggregated tweet counts per geocell and per hour. A geocell is defined by a particular geohash code (see geohash.org) of a certain length. The table contains counters for all geohashes up to length 6. The longer geohash the smaller the cell it denotes. Length 6 corresponds to cells of 1.2km * 0.6 km at the equator.
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| time_id | string | the hour when tweets occurred          |
+| geohash | string | the geohash of the cell                |
+| number  | int    | the number of tweets per hour and cell |
+| ds      | string | partition column day string            |
+|==============================================================================================
+
+
+=== sensor_x_geoindex
+
+Contains the ids of the tweet counted in target_x_geocells. Unlike geocells, this table only contains counters for geohashes of length 6.
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| time_id  | string | the hour when tweets occurred   |
+| geohash  | string | the geohash of the cell         |
+| tweet_id | bigint | the id of the tweet in the cell |
+| ds       | string | partition column day string     |
+|==============================================================================================
+
+=== sensor_x_eindex
+
+[cols="^1,^1,<2,<2", options="header"]
+|==============================================================================================
+| name                  | type    | comment                              | misc
+| time_id                | string | the hour when tweets occurred       |
+| user_screen_name       | string | the screen name of the author       |
+| retweeter_screen_name  | string | the screen name of the author       |
+| key                    | string | the key found in a tweet            |
+| geohash                | string | the geohash of the cell (length 6)  |
+| lang                   | string | the language of the tweet           |
+| tweet_id               | bigint | the id of the tweet in the cell     |
+| ds                     | string | partition column day string         |
+|==============================================================================================
