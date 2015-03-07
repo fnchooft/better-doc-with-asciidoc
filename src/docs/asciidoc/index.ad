@@ -1,4 +1,10 @@
-= Trivadis TechEvent March 2015
+Better documentation with AsciiDoc and AsciiDoctor
+==================================================
+Ulises Fasoli <ufasoli@gmail.com>
+v1.0, March 2015:
+Demo for TechEvent.
+
+== Trivadis TechEvent March 2015
 :toc:
 
 == Introduction
@@ -10,10 +16,15 @@ The goal of this document is to show some of the cool things you can do with asc
 
 .A compilation of useful links and information on how to write asciidoc
 
-* http://powerman.name/doc/asciidoc[Asciidoc cheatsheet, window="_blank"]
-* http://asciidoctor.org/docs/asciidoc-writers-guide/[Asciidoc manual, window="_blank"]
+* http://powerman.name/doc/asciidoc[AsciiDoc cheatsheet, window="_blank"]
+* http://asciidoctor.org/docs/asciidoc-writers-guide/[AsciiDoc manual, window="_blank"]
+* https://asciidoclive.com[AsciiDoc live editor, window="_blank"]
+* https://github.com/asciidoctor/asciidoctor-maven-examples[AsciiDoctor samples, window="_blank"]
 
-include::text_and_tables.ad[]
+
+include::text.ad[]
 include::images.ad[]
+include::tables.ad[]
 include::source_code.ad[]
+include::diagrams.ad[]
 

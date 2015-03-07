@@ -1,4 +1,4 @@
-== Impala
+== Tables
 
 
 All tables are partitioned by day, i.e. queries are most efficient when

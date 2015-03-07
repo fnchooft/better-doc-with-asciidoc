@@ -6,4 +6,5 @@ target
 *.iws
 *.iml
 *.ipr
+*.cache
 atlassian-ide-plugin.xml

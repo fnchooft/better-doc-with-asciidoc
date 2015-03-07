@@ -1,0 +1,30 @@
+== Text
+
+
+.Normal paragrahps
+Paragraphs don't require any special markup in AsciiDoc.
+A paragraph is just one or more lines of consecutive text.
+
+To begin a new paragraph, separate it by at least one blank line.
+
+Paragraphs don't require any special markup in AsciiDoc.
+A paragraph is just one or more lines of consecutive text.
+
+To begin a new paragraph, separate it by at least one blank line.
+
+
+.A preformatted paragraph.
+
+ A sequence of lines that begin with at least one space is a literal paragraph.
+ Literal paragraphs are treated as preformatted text.
+ The text is shown in a fixed-width font
+ and endlines are preserved.
+
+
+
+.A checked list
+- [*] checked
+- [x] also checked
+- [ ] not checked
+-     normal list item
+
